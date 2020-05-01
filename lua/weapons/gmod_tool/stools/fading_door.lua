@@ -490,11 +490,15 @@ local function dooEet(pl, Ent, stuff)
 		if Ent.fadeDeactivate then Ent:fadeDeactivate() end
 		RemoveKeys(Ent)
 	else
+	    local canCreate = hook.Run("FadingDoor_OnCreate", Ent, pl)
+	    if canCreate == false then return false end
+
 		Ent.isFadingDoor = true
 		Ent.fadeActivate = fadeActivate
 		Ent.fadeDeactivate = fadeDeactivate
 		Ent.fadeToggleActive = fadeToggleActive
 		Ent:CallOnRemove("Fading Doors", RemoveKeys)
+
 		if WireLib then
 			doWireInputs(Ent)
 			doWireOutputs(Ent)
@@ -570,7 +574,7 @@ function TOOL:LeftClick(tr)
 		net.Send(pl)
 	end
 	
-	dooEet(pl, Ent, {
+	local wasCreated = dooEet(pl, Ent, {
 		key     			= self:GetClientNumber("key"),
 		toggle   			= self:GetClientNumber("swap") == 1,
 		reversed			= self:GetClientNumber("reversed") == 1,
@@ -580,6 +584,8 @@ function TOOL:LeftClick(tr)
 		DoorLoopSound     	= self:GetClientNumber("loopsound"),
 		DoorCloseSound     	= self:GetClientNumber("closesound")
 	})
+
+	if wasCreated == false then return false end
 	
 	if !IsValid(Ent.FadingDoorDummy) then
 		local Dummy = ents.Create("info_null")
