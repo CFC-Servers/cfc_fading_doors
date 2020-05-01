@@ -302,6 +302,17 @@ local function fadeDeactivate(self)
 	end
 end
 
+local function setState(door, activate)
+    local canChange = hook.Run("FadingDoor_CanChangeState", door, activate)
+    if canChange == false then return end
+
+    if activate then
+        if not door.fadeActive then door:fadeActivate() end
+    else
+        if door.fadeActive then door:fadeDeactivate() end
+    end
+end
+
 local function onUp(pl, Ent)
 	if IsValid(Ent) then
 		local Activate = false
@@ -314,11 +325,8 @@ local function onUp(pl, Ent)
 		elseif Ent.fadeReversed then
 			Activate = true
 		end
-		if Activate then
-			if !Ent.fadeActive then Ent:fadeActivate() end
-		else
-			if Ent.fadeActive then Ent:fadeDeactivate() end
-		end
+
+		setState( Ent, Activate )
 	end
 end
 numpad.Register("Fading Door onUp", onUp)
@@ -335,11 +343,8 @@ local function onDown(pl, Ent)
 		elseif Ent.fadeReversed then
 			Activate = false
 		end
-		if Activate then
-			if !Ent.fadeActive then Ent:fadeActivate() end
-		else
-			if Ent.fadeActive then Ent:fadeDeactivate() end
-		end
+
+		setState( Ent, Activate )
 	end
 end
 numpad.Register("Fading Door onDown", onDown)
